@@ -6,8 +6,8 @@ router.get('/', (req, res) => {
     res.send('Hola mundo');
 })
 
-router.get('/find-shoes', (req, res) => {
-    scrapShoes();
+router.get('/find-shoes', async (req, res) => {
+    await scrapShoes();
     res.send('Hola mundo');
 })
 
