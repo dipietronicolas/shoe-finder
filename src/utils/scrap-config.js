@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const { NODE_ENVIRONMENTS } = require('./constants');
 const { sendMessage, sendMessageWithMedia } = require('./message.service');
 // Array that saves previos search
 let previousSearch = [];
@@ -12,57 +13,37 @@ const gridPagesContainer = [
     'https://www.grid.com.ar/calzado/jordan/nike/nike-sportswear/hombre?initialMap=category-1,genero&initialQuery=calzado/hombre&map=category-1,brand,brand,brand,genero&order=OrderByReleaseDateDESC'
 ]
 
-const scrapNames = (async () => {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+const puppeteerDevLaunchConfig = {
+    headless: false,
+}
 
-    let links = [];
-
-    for (const url of pagesContainer) {
-        await page.goto(url);
-        const resultsSelector = '.link';
-        await page.waitForSelector(resultsSelector);
-        // Extract the results from the page.
-        const newLinks = await page.evaluate(resultsSelector => {
-            return [...document.querySelectorAll(resultsSelector)].map(anchor => {
-                const title = anchor.textContent.split('|')[0].trim();
-                return `${title} - ${anchor.href}`;
-            });
-        }, resultsSelector);
-        links = [
-            ...links,
-            ...newLinks.filter(link => {
-                return link.toLowerCase().includes('jordan')
-            })
-        ]
-    }
-    // Print all the files.
-    await browser.close();
-    const results = links.join('\n');
-    sendMessage(results);
-});
+const puppeteerProdLaunchConfig = {
+    headless: true,
+    args: ['--no-sandbox']
+}
 
 const scrapShoes = async () => {
+    console.log('scrapping..')
     const browser = await puppeteer.launch(
-        {
-            headless: false,
-        }
-        /*
-        args: ['--no-sandbox']
-        */
+        process.env.NODE_ENV === NODE_ENVIRONMENTS.DEVELOPMENT
+            ? puppeteerDevLaunchConfig
+            : puppeteerProdLaunchConfig
     );
+
     const page = await browser.newPage();
     const gridScrappedLinks = await gridScrapper(page);
     const moovScrappedLinks = await moovScrapper(page);
-/*
+
     const previousSearchMapped = previousSearch.map(prev => prev.imageUrl)
-    const filteredLinks = scrappedLinks.filter((link) => {
+    const filteredLinks = [
+        ...gridScrappedLinks,
+        ...moovScrappedLinks,
+    ].filter((link) => {
         return !previousSearchMapped.includes(link?.imageUrl);
     })
-*/
     sendMessageWithMedia([ ...gridScrappedLinks, ...moovScrappedLinks]);
     await browser.close();
-    // previousSearch = scrappedLinks;
+    previousSearch = filteredLinks;
 }
 
 const gridScrapper = async (page) => {
@@ -126,6 +107,5 @@ const moovScrapper = async (page) => {
 }
 
 module.exports = {
-    scrapNames,
     scrapShoes,
 };
