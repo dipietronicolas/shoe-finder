@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
 const { NODE_ENVIRONMENTS } = require('./constants');
-const { sendMessage, sendMessageWithMedia } = require('./message.service');
+const { sendMessageWithMedia } = require('./message.service');
 // Array that saves previos search
 let previousSearch = [];
 // Pages to scrap
@@ -41,9 +41,10 @@ const scrapShoes = async () => {
     ].filter((link) => {
         return !previousSearchMapped.includes(link?.imageUrl);
     })
-    sendMessageWithMedia([ ...gridScrappedLinks, ...moovScrappedLinks]);
+    sendMessageWithMedia(filteredLinks);
     await browser.close();
-    previousSearch = filteredLinks;
+    previousSearch = [...gridScrappedLinks, ...moovScrappedLinks];
+
 }
 
 const gridScrapper = async (page) => {
@@ -59,8 +60,10 @@ const gridScrapper = async (page) => {
             return [...document.querySelectorAll(resultsSelector)].map(container => {
                 const title = container.getElementsByTagName('span')[1].textContent;
                 const imageUrl = container.getElementsByTagName('img')[0].currentSrc;
+                const anchor = container.getElementsByTagName('a')[0];
                 return {
                     title,
+                    link: anchor.href,
                     imageUrl,
                 }
             });

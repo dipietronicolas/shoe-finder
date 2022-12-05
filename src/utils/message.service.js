@@ -16,17 +16,19 @@ const sendMessage = (message = '') => {
 }
 
 const sendMessageWithMedia = (elements = []) => {
-    elements.map((shoe) => {
-        client.messages
-            .create({
-                mediaUrl: shoe.imageUrl,
-                from: `whatsapp:${twilioPhoneNumber}`,
-                body: `${shoe.title} - ${shoe?.link ?? ' '}`,
-                to: `whatsapp:${myPhoneNumber}`
-            })
-            .then(message => console.log('.then del message service: ', message))
-            .catch(error => console.error(error));
-    })
+    elements.length > 0 && (
+        elements.map((shoe) => {
+            client.messages
+                .create({
+                    mediaUrl: shoe.imageUrl,
+                    from: `whatsapp:${twilioPhoneNumber}`,
+                    body: `${shoe.title} - ${shoe?.link ?? ' '}`,
+                    to: `whatsapp:${myPhoneNumber}`
+                })
+                .then(message => console.log('.then del message service: ', message))
+                .catch(error => console.error(error));
+        })
+    )
 }
 
 
