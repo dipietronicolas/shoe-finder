@@ -21,10 +21,10 @@ const sendMessageWithMedia = (elements = []) => {
             .create({
                 mediaUrl: shoe.imageUrl,
                 from: `whatsapp:${twilioPhoneNumber}`,
-                body: `${shoe.title} - ${shoe.link}`,
+                body: `${shoe.title} - ${shoe?.link ?? ' '}`,
                 to: `whatsapp:${myPhoneNumber}`
             })
-            .then(message => console.log(message))
+            .then(message => console.log('.then del message service: ', message))
             .catch(error => console.error(error));
     })
 }
