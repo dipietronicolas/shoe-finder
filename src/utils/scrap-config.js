@@ -23,7 +23,7 @@ const puppeteerProdLaunchConfig = {
 }
 
 const scrapShoes = async () => {
-    console.log('scrapping..')
+    console.log('scrapping..');
     const browser = await puppeteer.launch(
         process.env.NODE_ENV === NODE_ENVIRONMENTS.DEVELOPMENT
             ? puppeteerDevLaunchConfig
@@ -34,17 +34,16 @@ const scrapShoes = async () => {
     const gridScrappedLinks = await gridScrapper(page);
     const moovScrappedLinks = await moovScrapper(page);
 
-    const previousSearchMapped = previousSearch.map(prev => prev.imageUrl)
+    const previousSearchMapped = previousSearch.map(prev => prev.title)
     const filteredLinks = [
         ...gridScrappedLinks,
         ...moovScrappedLinks,
     ].filter((link) => {
-        return !previousSearchMapped.includes(link?.imageUrl);
+        return !previousSearchMapped.includes(link.title);
     })
     sendMessageWithMedia(filteredLinks);
     await browser.close();
     previousSearch = [...gridScrappedLinks, ...moovScrappedLinks];
-
 }
 
 const gridScrapper = async (page) => {
@@ -71,7 +70,11 @@ const gridScrapper = async (page) => {
         links = [
             ...links,
             ...newLinks.filter(element => {
-                return element.title.toLowerCase().includes('jordan')
+                return (
+                    element.title.toLowerCase().includes('jordan') ||
+                    element.title.toLowerCase().includes('dunk') ||
+                    element.title.toLowerCase().includes('force')
+                )
             })
         ]
     }
@@ -102,7 +105,11 @@ const moovScrapper = async (page) => {
         links = [
             ...links,
             ...newLinks.filter(element => {
-                return element.title.toLowerCase().includes('jordan')
+                return (
+                    element.title.toLowerCase().includes('jordan') ||
+                    element.title.toLowerCase().includes('dunk') ||
+                    element.title.toLowerCase().includes('force')
+                )
             })
         ]
     }
